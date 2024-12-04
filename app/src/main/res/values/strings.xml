@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ParamBhog</string>
+    <string name="app_small_desc">Choose with devotion, offered with faith</string>
+    <string name="sign_in_google">Sign In with Google</string>
 </resources>
