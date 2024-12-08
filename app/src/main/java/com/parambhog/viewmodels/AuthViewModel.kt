@@ -7,11 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.parambhog.data.model.ApiResponse
 import com.parambhog.data.repository.GoogleAuthRepository
 import com.parambhog.data.repository.PhoneAuthRepository
+import com.parambhog.data.repository.UserCacheManager
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val googleAuthRepository: GoogleAuthRepository,
-    private val phoneAuthRepository: PhoneAuthRepository
+    private val phoneAuthRepository: PhoneAuthRepository,
+    private val userCacheManager: UserCacheManager
 ) : ViewModel() {
     private val _isSignedIn = MutableLiveData<Boolean>()
     val isSignedIn: LiveData<Boolean> get() = _isSignedIn
@@ -26,7 +28,7 @@ class AuthViewModel(
     val otpVerificationStatus: LiveData<Result<ApiResponse>> get() = _otpVerificationStatus
 
     init {
-        _isSignedIn.value = googleAuthRepository.isSignedIn() || phoneAuthRepository.isSignedIn()
+        _isSignedIn.value = userCacheManager.isSignedIn()
     }
 
     fun signInWithGoogle() {

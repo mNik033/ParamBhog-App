@@ -20,6 +20,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.parambhog.data.remote.RetrofitClient
 import com.parambhog.data.repository.GoogleAuthRepository
 import com.parambhog.data.repository.PhoneAuthRepository
+import com.parambhog.data.repository.UserCacheManager
 import com.parambhog.databinding.ActivityLoginBinding
 import com.parambhog.databinding.BottomSheetPhoneAuthBinding
 import com.parambhog.viewmodels.AuthViewModel
@@ -35,13 +36,15 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val userCacheManager = UserCacheManager(this)
         val googleAuthClient = GoogleAuthClient(this)
         val phoneAuthClient = PhoneAuthClient(this)
         val googleAuthRepository =
-            GoogleAuthRepository(RetrofitClient.apiService, googleAuthClient, this)
+            GoogleAuthRepository(RetrofitClient.apiService, googleAuthClient, userCacheManager)
         val phoneAuthRepository =
-            PhoneAuthRepository(RetrofitClient.apiService, phoneAuthClient, this)
-        val factory = AuthViewModelFactory(googleAuthRepository, phoneAuthRepository)
+            PhoneAuthRepository(RetrofitClient.apiService, phoneAuthClient, userCacheManager)
+        val factory =
+            AuthViewModelFactory(googleAuthRepository, phoneAuthRepository, userCacheManager)
         val bottomSheet = PhoneAuthBottomSheet(
             onOtpRequest = { phoneNumber ->
                 viewModel.requestOtp(phoneNumber)

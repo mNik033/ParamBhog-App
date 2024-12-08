@@ -11,11 +11,6 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 class GoogleAuthClient(private val context: Context) {
     private val credentialManager = CredentialManager.create(context)
 
-    fun isSignedIn(): Boolean {
-        val sharedPreferences = context.getSharedPreferences("UserDetails", Context.MODE_PRIVATE)
-        return sharedPreferences.contains("email")
-    }
-
     suspend fun getIdToken(): String {
         return try {
             val request = buildCredentialRequest()

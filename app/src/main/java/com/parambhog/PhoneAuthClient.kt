@@ -16,11 +16,6 @@ class PhoneAuthClient(private val context: Context) {
     private var authCallBack: ((Boolean, String?) -> Unit)? = null
     private var user: FirebaseUser? = null
 
-    fun isSignedIn(): Boolean {
-        val sharedPreferences = context.getSharedPreferences("UserDetails", Context.MODE_PRIVATE)
-        return sharedPreferences.contains("phoneNumber")
-    }
-
     fun requestOtp(phoneNumber: String, callback: (Boolean, String?) -> Unit) {
         authCallBack = callback
         val options = PhoneAuthOptions.newBuilder(FirebaseAuth.getInstance())
