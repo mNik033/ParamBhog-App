@@ -65,4 +65,6 @@ dependencies {
 
     implementation(libs.firebase.auth.ktx)
     implementation(platform(libs.firebase.bom))
+
+    implementation (libs.github.glide)
 }
