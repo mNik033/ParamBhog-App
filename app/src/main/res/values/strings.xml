@@ -10,4 +10,18 @@
     <string name="enter_otp">Enter the OTP sent to\n%1$s</string>
     <string name="enter_phone_number">Enter a phone number for\nParamBhog</string>
     <string name="phone">Phone</string>
+    <string name= "review_cart">Review Cart</string>
+    <string name="order_weight_limit_exceeded">Please remove items from cart. Current order limit is 2kg</string>
+    <string name="total_weight">Total weight</string>
+    <string name="total_price">Total price</string>
+    <string name="proceed_to_checkout">Proceed to Checkout</string>
+    <string name="cart">Cart</string>
+    <string name="details">Details</string>
+    <string name="full_name">Full Name</string>
+    <string name="email">Email</string>
+    <string name="address">Address</string>
+    <string name="pin_code">Pin Code</string>
+    <string name="state">State</string>
+    <string name="district">District</string>
+    <string name="address_details">Flat, House No, Building, Company, Apartment</string>
 </resources>

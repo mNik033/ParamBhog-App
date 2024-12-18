@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -15,8 +16,15 @@ import com.parambhog.R
 import com.parambhog.data.model.Item
 import java.util.Locale
 
-class ItemRecyclerAdapter(private val itemList: ArrayList<Item>) :
+class ItemRecyclerAdapter(
+    private val itemList: ArrayList<Item>,
+    private val cartActionListener: OnCartActionListener
+) :
     RecyclerView.Adapter<ItemRecyclerAdapter.ItemViewHolder>() {
+
+    interface OnCartActionListener {
+        fun onAddToCart(itemID: Int, title: String, price: Int, weight: Int, quantity: Int)
+    }
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.itemTitle)
@@ -25,6 +33,7 @@ class ItemRecyclerAdapter(private val itemList: ArrayList<Item>) :
         val image: BlurredImageView = itemView.findViewById(R.id.itemImage)
         val priceMenu: MaterialAutoCompleteTextView = itemView.findViewById(R.id.itemPriceMenu)
         val detailsContainer: LinearLayout = itemView.findViewById(R.id.detailsContainer)
+        val addToCartBtn: Button = itemView.findViewById(R.id.buttonAddToCart)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
@@ -50,8 +59,9 @@ class ItemRecyclerAdapter(private val itemList: ArrayList<Item>) :
         )
         holder.priceMenu.setAdapter(adapter)
 
-        holder.priceMenu.setOnItemClickListener { _, _, position, _ ->
-            val selectedPrice = item.quantityMap.keys.elementAt(position)
+        var selectedPrice = entry.key
+        holder.priceMenu.setOnItemClickListener { _, _, i, _ ->
+            selectedPrice = item.quantityMap.keys.elementAt(i)
             holder.weight.text =
                 String.format(Locale.getDefault(), "%d gm", item.quantityMap[selectedPrice])
             if (item.quantityMap[selectedPrice]!! >= 1000) holder.weight.text = String.format(
@@ -67,6 +77,10 @@ class ItemRecyclerAdapter(private val itemList: ArrayList<Item>) :
         holder.detailsContainer.post {
             val blurHeight = holder.detailsContainer.height
             holder.image.setBlurArea(blurHeight, 16 * getSystem().displayMetrics.density)
+        }
+
+        holder.addToCartBtn.setOnClickListener {
+            cartActionListener.onAddToCart(item.itemID, item.title, selectedPrice, item.quantityMap[selectedPrice]!!, 1)
         }
     }
 
