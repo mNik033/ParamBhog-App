@@ -13,14 +13,14 @@ class PhoneAuthRepository(
     private val phoneOTPAuthClient: PhoneAuthClient,
     private val userCacheManager: UserCacheManager
 ) {
-    fun requestOtp(phoneNumber: String, callback: ((Boolean, String?) -> Unit)) {
+    fun requestOtp(phoneNumber: String, callback: ((Int, String?) -> Unit)) {
         phoneOTPAuthClient.requestOtp(phoneNumber, callback)
     }
 
     suspend fun verifyOtp(otp: String): Boolean {
         return suspendCoroutine { continuation ->
             phoneOTPAuthClient.verifyOtp(otp) { success, message ->
-                if (success) {
+                if (success == 1) {
                     continuation.resume(true)
                 } else {
                     continuation.resumeWithException(Exception(message))

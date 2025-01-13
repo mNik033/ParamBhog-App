@@ -45,11 +45,11 @@ class AuthViewModel(
     fun requestOtp(phoneNumber: String) {
         viewModelScope.launch {
             try {
-                phoneAuthRepository.requestOtp(phoneNumber) { success, message ->
-                    if (success) {
-                        _otpRequestStatus.postValue(Result.success(true))
-                    } else {
-                        _otpRequestStatus.postValue(Result.failure(Exception(message)))
+                phoneAuthRepository.requestOtp(phoneNumber) { result, message ->
+                    when (result) {
+                        0 -> _otpRequestStatus.postValue(Result.failure(Exception(message)))
+                        1 -> _otpRequestStatus.postValue(Result.success(true))
+                        2 -> handleSignInWithPhoneOtp(phoneNumber)
                     }
                 }
             } catch (e: Exception) {
@@ -62,11 +62,20 @@ class AuthViewModel(
         viewModelScope.launch {
             try {
                 phoneAuthRepository.verifyOtp(otp)
+                handleSignInWithPhoneOtp(phoneNumber)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _otpVerificationStatus.postValue(Result.failure(e))
+            }
+        }
+    }
 
+    private fun handleSignInWithPhoneOtp(phoneNumber: String) {
+        viewModelScope.launch {
+            try {
                 val response = phoneAuthRepository.signInWithPhoneOtp(phoneNumber)
                 _otpVerificationStatus.postValue(Result.success(response))
             } catch (e: Exception) {
-                e.printStackTrace()
                 _otpVerificationStatus.postValue(Result.failure(e))
             }
         }

@@ -13,10 +13,10 @@ import java.util.concurrent.TimeUnit
 
 class PhoneAuthClient(private val context: Context) {
     private var verificationId: String? = null
-    private var authCallBack: ((Boolean, String?) -> Unit)? = null
+    private var authCallBack: ((Int, String?) -> Unit)? = null
     private var user: FirebaseUser? = null
 
-    fun requestOtp(phoneNumber: String, callback: (Boolean, String?) -> Unit) {
+    fun requestOtp(phoneNumber: String, callback: (Int, String?) -> Unit) {
         authCallBack = callback
         val options = PhoneAuthOptions.newBuilder(FirebaseAuth.getInstance())
             .setPhoneNumber(phoneNumber)
@@ -24,11 +24,14 @@ class PhoneAuthClient(private val context: Context) {
             .setActivity(context as Activity)
             .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    signInWithCredential(credential)
+                    signInWithCredential(credential) { success, message ->
+                        if (success == 1) callback(2, message)
+                        else callback(0, message)
+                    }
                 }
 
                 override fun onVerificationFailed(e: FirebaseException) {
-                    callback(false, e.localizedMessage)
+                    callback(0, e.localizedMessage)
                 }
 
                 override fun onCodeSent(
@@ -36,7 +39,7 @@ class PhoneAuthClient(private val context: Context) {
                     token: PhoneAuthProvider.ForceResendingToken
                 ) {
                     this@PhoneAuthClient.verificationId = verificationId
-                    callback(true, null)
+                    callback(1, null)
                 }
 
             })
@@ -44,26 +47,26 @@ class PhoneAuthClient(private val context: Context) {
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    fun verifyOtp(otp: String, callback: (Boolean, String?) -> Unit) {
+    fun verifyOtp(otp: String, callback: (Int, String?) -> Unit) {
         val credential = verificationId?.let { PhoneAuthProvider.getCredential(it, otp) }
         if (credential != null) {
             signInWithCredential(credential, callback)
         } else {
-            callback(false, "Invalid verification ID")
+            callback(0, "Invalid verification ID")
         }
     }
 
     private fun signInWithCredential(
         credential: PhoneAuthCredential,
-        callback: (Boolean, String?) -> Unit = authCallBack ?: { _, _ -> }
+        callback: (Int, String?) -> Unit = authCallBack ?: { _, _ -> }
     ) {
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     user = task.result.user
-                    callback(true, task.result.user?.phoneNumber)
+                    callback(1, task.result.user?.phoneNumber)
                 } else {
-                    callback(false, task.exception?.localizedMessage)
+                    callback(0, task.exception?.localizedMessage)
                 }
             }
     }
