@@ -47,11 +47,10 @@ class ItemRecyclerAdapter(
         holder.title.text = item.title
         holder.desc.text = item.description
 
-        val entry = item.quantityMap.iterator().next()
-        holder.priceMenu.setText(String.format(Locale.getDefault(), "₹ %d", entry.key))
-        holder.weight.text = String.format(Locale.getDefault(), "%d gm", entry.value)
+        holder.priceMenu.setText(String.format(Locale.getDefault(), "₹ %d", item.tags[0].price))
+        holder.weight.text = String.format(Locale.getDefault(), "%d gm", item.tags[0].weight)
 
-        val prices = item.quantityMap.keys.map { "₹ $it" }
+        val prices = item.tags.map { "₹ ${it.price}" }
         val adapter = ArrayAdapter(
             holder.itemView.context,
             android.R.layout.simple_dropdown_item_1line,
@@ -59,18 +58,20 @@ class ItemRecyclerAdapter(
         )
         holder.priceMenu.setAdapter(adapter)
 
-        var selectedPrice = entry.key
+        var selectedPrice = item.tags[0].price
+        var selectedWeight = item.tags[0].weight
         holder.priceMenu.setOnItemClickListener { _, _, i, _ ->
-            selectedPrice = item.quantityMap.keys.elementAt(i)
+            selectedPrice = item.tags[i].price
+            selectedWeight = item.tags[i].weight
             holder.weight.text =
-                String.format(Locale.getDefault(), "%d gm", item.quantityMap[selectedPrice])
-            if (item.quantityMap[selectedPrice]!! >= 1000) holder.weight.text = String.format(
-                Locale.getDefault(), "%d kg", item.quantityMap[selectedPrice]?.div(1000)
+                String.format(Locale.getDefault(), "%d gm", selectedWeight)
+            if (selectedWeight >= 1000) holder.weight.text = String.format(
+                Locale.getDefault(), "%d kg", selectedWeight.div(1000)
             )
         }
 
         Glide.with(holder.itemView)
-            .load(item.imageUrl)
+            .load(item.image)
             .centerCrop()
             .into(holder.image)
 
@@ -80,7 +81,7 @@ class ItemRecyclerAdapter(
         }
 
         holder.addToCartBtn.setOnClickListener {
-            cartActionListener.onAddToCart(item.itemID, item.title, selectedPrice, item.quantityMap[selectedPrice]!!, 1)
+            cartActionListener.onAddToCart(item.id, item.title, selectedPrice, selectedWeight, 1)
         }
     }
 

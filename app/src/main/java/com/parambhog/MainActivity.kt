@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.parambhog.adapters.ItemRecyclerAdapter
@@ -16,6 +17,7 @@ import com.parambhog.data.repository.ItemRepository
 import com.parambhog.databinding.ActivityMainBinding
 import com.parambhog.viewmodels.CartViewModel
 import com.parambhog.viewmodels.CartViewModelFactory
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -34,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         val repository = CartRepository(applicationContext)
         val cartViewModel =
             ViewModelProvider(this, CartViewModelFactory(repository))[CartViewModel::class.java]
-        itemList = ItemRepository().getItemList()
+        itemList = arrayListOf()
 
         val adapter =
             ItemRecyclerAdapter(itemList, object : ItemRecyclerAdapter.OnCartActionListener {
@@ -45,6 +47,17 @@ class MainActivity : AppCompatActivity() {
 
         binding.homeRecyclerView.layoutManager = GridLayoutManager(applicationContext, 2)
         binding.homeRecyclerView.adapter = adapter
+
+        lifecycleScope.launch {
+            try {
+                val fetchedItems = ItemRepository.getItemList()
+                itemList.clear()
+                itemList.addAll(fetchedItems)
+                adapter.notifyItemRangeChanged(0, fetchedItems.size)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
 
         cartViewModel.totalWeight.observe(this) { totalWeight ->
             if (totalWeight > 2000) {
